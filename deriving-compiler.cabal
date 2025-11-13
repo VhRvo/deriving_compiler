@@ -63,6 +63,10 @@ library
       MyLib
       Arith.Def
       Arith.Step1Stacking
+      Arith.Step2Cps
+      Arith.Step3D17n
+      Arith.Step3ConciseD17n
+    --   Arith.Step4
 
     -- Modules included in this library but not exported.
     -- other-modules:

@@ -9,6 +9,7 @@ data Op
 data Exp
   = Lit Int
   | Bin Op Exp Exp
+  deriving (Eq, Ord, Show)
 
 eval :: Exp -> Int
 eval =
@@ -20,4 +21,3 @@ evalOp :: Op -> Int -> Int -> Int
 evalOp Add = (+)
 evalOp Sub = (-)
 evalOp Mul = (*)
-
