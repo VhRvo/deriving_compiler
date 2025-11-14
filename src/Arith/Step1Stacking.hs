@@ -1,7 +1,7 @@
 module Arith.Step1Stacking where
 
+import Arith.Def ( Exp(..), Op, evalOp )
 import Prelude hiding (exp)
-import Arith.Def
 
 eval :: Exp -> [Int]
 eval exp = evalS exp []
@@ -13,7 +13,9 @@ evalS exp stack =
     Lit int ->
       -- eval (Lit int) : stack
       {- apply `eval` -}
-      int : stack
+      -- int : stack
+      {- unapply `push` -}
+      push int stack
     Bin op e1 e2 ->
       -- eval (Bin op e1 e2) : stack
       {- apply `eval` -}
@@ -24,6 +26,9 @@ evalS exp stack =
       --   evalOpS op (eval e2 : evalS e1 stack)
       {- unapply `evalS` -}
       evalOpS op (evalS e2 (evalS e1 stack))
+
+push :: Int -> [Int] -> [Int]
+push = (:)
 
 evalOpS :: Op -> [Int] -> [Int]
 evalOpS op (e2 : e1 : stack) = evalOp op e1 e2 : stack

@@ -1,16 +1,16 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Avoid lambda" #-}
 {-# HLINT ignore "Redundant bracket" #-}
 {-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
 module Arith.Step3ConciseD17n where
 
-import Prelude hiding (exp)
-import Arith.Def
+import Arith.Def ( Exp(..), Op )
 import Arith.Step1Stacking
-import Arith.Step2Cps
+import Prelude hiding (exp)
 
 eval :: Exp -> [Int]
-eval exp = evalD exp [] End
+eval exp = evalD exp [] ContEnd
 
 evalD :: Exp -> [Int] -> Cont -> [Int]
 -- {- evalD exp stack cont = evalK exp stack (applyCont cont) -}
@@ -41,7 +41,7 @@ evalD exp stack cont =
       evalD e1 stack (ContExp e2 (ContOp op cont))
 
 data Cont
-  = End
+  = ContEnd
   | ContOp Op Cont
   | ContExp Exp Cont
   deriving (Eq, Ord, Show)
@@ -49,9 +49,10 @@ data Cont
 applyCont :: Cont -> [Int] -> [Int]
 applyCont cont =
   case cont of
-    End -> id
+    ContEnd -> id
     ContOp op cont ->
       \s2 ->
         (applyCont cont) (evalOpS op s2)
     ContExp e2 cont' ->
+      -- assert cont'@(ContOp op cont)
       \s1 -> evalD e2 s1 cont'

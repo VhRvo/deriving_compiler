@@ -66,7 +66,7 @@ library
       Arith.Step2Cps
       Arith.Step3D17n
       Arith.Step3ConciseD17n
-    --   Arith.Step4
+      Arith.Step4ConciseInstr
 
     -- Modules included in this library but not exported.
     -- other-modules:
