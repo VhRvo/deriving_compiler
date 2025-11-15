@@ -86,9 +86,11 @@ evalKD1 exp cont =
       {- unapply `evalKD1` -}
       -- (evalK e1) (\v1 -> evalKD1 e2 (D1Op op v1 cont))
       {- introducing local binding  -}
-      {- *** stuck, v1 is free variable but bounded by `D1Op` -}
+      {- *** stuck ***,
+         v1 is free variable but bounded by `D1Op`,
+         so I cannot bind `D1Op op v1 cont` locally. -}
       -- (evalK e1) (\v1 -> evalKD1 e2 (D1Op op v1 cont))
-      {- introducing `D2Exp` -}
+      {- introducing `D1Exp` -}
       -- (evalK e1) (applyD1 (D1Exp e2 op cont))
       {- unapply `evalKD1` -}
       evalKD1 e1 (D1Exp e2 op cont)
@@ -127,3 +129,45 @@ evalKD2 exp cont =
       -- (evalK e1) (applyD2 (D2Exp e2 op cont))
       {- unapply `evalKD2` -}
       (evalKD2 e1) (D2Exp e2 op cont)
+
+data D3
+  = D3End
+  | D3Val Int D3
+  | D3Op Op D3
+  | D3Exp Exp D3
+
+applyD3 :: D3 -> Int -> Int
+applyD3 cont =
+  case cont of
+    D3End ->
+      id
+    D3Val v1 (D3Op op cont) ->
+      \v2 -> (applyD3 cont) (evalOp op v1 v2)
+    D3Exp e2 (D3Op op cont) ->
+      \v1 -> evalKD3 e2 (D3Val v1 (D3Op op cont))
+    _ -> error "applyD3: unexpected cont"
+
+
+evalKD3 :: Exp -> D3 -> Int
+{- evalKD3 exp cont = evalK exp (applyD3 cont) -}
+evalKD3 exp cont =
+  case exp of
+    Lit int ->
+      evalK (Lit int) (applyD3 cont)
+    Bin op e1 e2 ->
+      -- evalK (Bin op e1 e2) (applyD3 cont)
+      {- apply `evalK` -}
+      -- (evalK e1) (\v1 -> (evalK e2) (\v2 -> (applyD3 cont) (evalOp op v1 v2)))
+      {- introducing `D3Val` and `D3Op` -}
+      -- (evalK e1) (\v1 -> (evalK e2) (applyD3 (D3Val v1 (D3Op op cont))))
+      {- unapply `evalKD3` -}
+      -- (evalK e1) (\v1 -> evalKD3 e2 (D3Val v1 (D3Op op cont)))
+      {- introducing local binding  -}
+      {- *** stuck similarly ***,
+         v1 is free variable but bounded by `D3Op`,
+         so I cannot bind `D3Op op v1 cont` locally. -}
+      -- (evalK e1) (\v1 -> evalKD3 e2 (D3Val v1 (D3Op op cont)))
+      {- introducing `D3Exp` -}
+      -- (evalK e1) (applyD3 (D3Exp e2 (D3Op op cont)))
+      {- unapply `evalKD3` -}
+      evalKD3 e1 (D3Exp e2 (D3Op op cont))
