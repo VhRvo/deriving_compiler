@@ -62,11 +62,16 @@ library
     exposed-modules:
       MyLib
       Arith.Def
+      Arith.Step0Eval
       Arith.Step1Stacking
       Arith.Step2Cps
       Arith.Step3D17n
       Arith.Step3ConciseD17n
       Arith.Step4ConciseInstr
+      Arith.Hutton
+      Exception.Def
+      Exception.Step0Eval
+      Exception.Step1Stacking
 
     -- Modules included in this library but not exported.
     -- other-modules:
