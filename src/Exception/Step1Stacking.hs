@@ -24,21 +24,28 @@ evalS expr stack =
     Bin op e1 e2 ->
       -- eval (Bin op e1 e2) : stack
       {- apply `eval` -}
-      case eval e1 of
-        Nothing -> Nothing : stack
-        Just v1 ->
-          case eval e2 of
-            Nothing -> Nothing : stack
-            Just v2 ->
-              -- Just (evalOp op v1 v2) : stack
-              {- unapply `evalOpS` -}
-              evalOpS op (Just v2 : Just v1 : stack)
-
-              {- unapply `eval` -}
-              -- evalOpS op (eval e2 : Just v1 : stack)
-              {- unapply specification -}
-              -- evalOpS op (evalS e2 (Just v1 : stack))
-              {- unapply `eval` -}
+      -- case eval e1 of
+      --   Nothing ->
+      --     -- Nothing : stack
+      --     evalOpS op (eval e2 : Nothing : stack)
+      --   Just v1 ->
+      --     -- case eval e2 of
+      --     --   Nothing ->
+      --     --     -- Nothing : stack
+      --     --     {- unapply `evalOpS` -}
+      --     --     evalOpS op (Nothing : Just v1 : stack)
+      --     --   Just v2 ->
+      --     --     -- Just (evalOp op v1 v2) : stack
+      --     --     {- unapply `evalOpS` -}
+      --     --     evalOpS op (Just v2 : Just v1 : stack)
+      --     {- extract continuation -}
+      --     evalOpS op (eval e2 : Just v1 : stack)
+      {- extract continuation -}
+      -- evalOpS op (eval e2 : eval e1 : stack)
+      {- unapply specification -}
+      -- evalOpS op (eval e2 : evalS e1 stack)
+      {- unapply specification -}
+      evalOpS op (evalS e2 (evalS e1 stack))
     Throw ->
       -- eval Throw : stack
       {- apply `eval` -}
@@ -46,13 +53,35 @@ evalS expr stack =
     Catch e1 e2 ->
       -- eval (Catch e1 e2) : stack
       {- apply `eval` -}
-      case eval e1 of
-        Nothing ->
-          eval e2 : stack
-        Just v1 ->
-          Just v1 : stack
+      -- case eval e1 of
+      --   Nothing ->
+      --     -- eval e2 : stack
+      --     {- unapply `evalCatchS` -}
+      --     evalCatchS e2 (Nothing : stack)
+      --   Just v1 ->
+      --     -- Just v1 : stack
+      --     {- unapply `evalCatchS` -}
+      --     evalCatchS e2 (Just v1 : stack)
+      {- extract continuation -}
+      -- evalCatchS e2 (eval e1 : stack)
+      {- unapply specification -}
+      evalCatchS e2 (evalS e1 stack)
 
 evalOpS :: Op -> Stack -> Stack
 evalOpS op (Just v2 : Just v1 : stack) =
   Just (evalOp op v1 v2) : stack
-evalOpS _ _ = error "unexpected use of evalOpS"
+evalOpS _ (Nothing : _ : stack) =
+  Nothing : stack
+evalOpS _ (_ : Nothing : stack) =
+  Nothing : stack
+evalOpS _ _ =
+  error "unexpected use of evalOpS"
+
+evalCatchS :: Exp -> Stack -> Stack
+evalCatchS _ (Just v1 : stack) = Just v1 : stack
+evalCatchS e2 (Nothing : stack) =
+  -- eval e2 : stack
+  {- unapply specification -}
+  evalS e2 stack
+evalCatchS _ _ =
+  error "unexpected use of evalOpS"
