@@ -19,8 +19,6 @@ evalOp Add = (+)
 evalOp Sub = (-)
 evalOp Mul = (*)
 
-
-
 evalK :: Exp -> (Int -> Int) -> Int
 {- evalK expr cont = cont (eval expr) -}
 evalK expr cont =

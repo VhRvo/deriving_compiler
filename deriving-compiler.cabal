@@ -71,7 +71,10 @@ library
       Arith.Hutton
       Exception.Def
       Exception.Step0Eval
+      Exception.Step01Cps
       Exception.Step1Stacking
+      Exception.Step1HuttonStacking
+      Exception.Step2Cps
 
     -- Modules included in this library but not exported.
     -- other-modules:

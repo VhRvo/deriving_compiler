@@ -22,10 +22,12 @@ eval expr =
       Just int
     Bin op e1 e2 ->
       case eval e1 of
-        Nothing -> Nothing
+        Nothing ->
+          Nothing
         Just v1 ->
           case eval e2 of
-            Nothing -> Nothing
+            Nothing ->
+              Nothing
             Just v2 ->
               Just (evalOp op v1 v2)
     Throw ->
@@ -106,7 +108,11 @@ evalK expr cont =
       {- extract continuation -}
       -- (cont . maybe (eval e2) Just) (eval e1)
       {- unapply specification -}
-      evalK e1 (cont . maybe (eval e2) Just)
+      -- evalK e1 (cont . maybe (eval e2) Just)
+      {- unapply `composition` -}
+      -- (\result -> evalK e1 (cont . maybe result Just)) (eval e2)
+      {- unapply specification -}
+      evalK e2 (\result -> evalK e1 (cont . maybe result Just))
 
 eval2K :: Exp -> Value -> (Value -> Value) -> Value
 {-

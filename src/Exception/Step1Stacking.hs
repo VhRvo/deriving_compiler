@@ -51,6 +51,7 @@ evalS expr stack =
       {- apply `eval` -}
       Nothing : stack
     Catch e1 e2 ->
+      {- method 1 -}
       -- eval (Catch e1 e2) : stack
       {- apply `eval` -}
       -- case eval e1 of
@@ -65,7 +66,25 @@ evalS expr stack =
       {- extract continuation -}
       -- evalCatchS e2 (eval e1 : stack)
       {- unapply specification -}
-      evalCatchS e2 (evalS e1 stack)
+      -- evalCatchS e2 (evalS e1 stack)
+
+      {- method 2 -}
+      -- eval (Catch e1 e2) : stack
+      {- apply `eval` -}
+      -- case eval e1 of
+      --   Nothing ->
+      --     -- eval e2 : stack
+      --     {- unapply `evalCatchSHandler` -}
+      --     evalCatchSHandler (eval e2 : stack) (Nothing : stack)
+      --   Just v1 ->
+      --     -- Just v1 : stack
+      --     {- unapply `evalCatchSHandler` -}
+      --     evalCatchSHandler (eval e2 : stack) (Just v1 : stack)
+      -- evalCatchSHandler (eval e2 : stack) (eval e1 : stack)
+      {- unapply specification -}
+      -- evalCatchSHandler (eval e2 : stack) (evalS e1 stack)
+      {- unapply specification -}
+      evalCatchSHandler (evalS e2 stack) (evalS e1 stack)
 
 evalOpS :: Op -> Stack -> Stack
 evalOpS op (Just v2 : Just v1 : stack) =
@@ -84,4 +103,10 @@ evalCatchS e2 (Nothing : stack) =
   {- unapply specification -}
   evalS e2 stack
 evalCatchS _ _ =
+  error "unexpected use of evalOpS"
+
+evalCatchSHandler :: Stack -> Stack -> Stack
+evalCatchSHandler _ (Just v1 : stack) = Just v1 : stack
+evalCatchSHandler handler (Nothing : _) = handler
+evalCatchSHandler _ _ =
   error "unexpected use of evalOpS"
