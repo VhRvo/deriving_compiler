@@ -44,14 +44,14 @@ evalSK :: Exp -> ([Int] -> [Int]) -> [Int] -> [Int]
 {- evalSK expr cont stack = cont (evalS expr stack) -}
 {- evalSK expr cont stack = cont (eval expr : stack) -}
 -- evalSK expr cont stack =
-{- eta -}
+{- apply eta -}
 evalSK expr cont =
   case expr of
     Lit int ->
       -- cont (push (eval (Lit int)) stack)
       {- apply `eval` -}
       -- cont (push int stack)
-      {- eta -}
+      {- apply eta -}
       cont . push int
     Bin op e1 e2 ->
       -- cont (push (eval (Bin op e1 e2)) stack)
@@ -67,7 +67,7 @@ evalSK expr cont =
       -- evalSK e2 (\s2 -> cont (evalOpS op s2)) (push (eval e1) stack)
       {- unapply specification of `evalSK` -}
       -- evalSK e1 (\s1 -> evalSK e2 (\s2 -> cont (evalOpS op s2)) s1) stack
-      {- eta -}
+      {- apply eta -}
       evalSK e1 (evalSK e2 (cont . evalOpS op))
 
 {- applyD4 (evalKSD4 expr cont) stack = evalSK expr (applyD4 cont) stack -}

@@ -2,6 +2,7 @@ module Exception.Step1HuttonStacking where
 
 import Exception.Def
 import Exception.Step0Eval
+import Prelude hiding (fail)
 
 data Element
   = Value Int
@@ -54,9 +55,9 @@ evalS expr stack =
         Just v1 ->
           case eval e2 of
             Nothing ->
-              fail stack
-              -- {- constructing `fail` -}
-              -- fail (Exception : Value v1 : stack)
+              -- fail stack
+              {- constructing `fail` -}
+              fail (Exception : Value v1 : stack)
             Just v2 ->
               -- Value (evalOp op v1 v2) : stack
               {- constructing `evalOpS` -}

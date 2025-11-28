@@ -9,14 +9,14 @@ import Arith.Step1Stacking hiding (evalSK)
 evalSK :: Exp -> ([Int] -> [Int]) -> [Int] -> [Int]
 {- evalSK expr cont stack = cont (evalS expr stack) -}
 -- evalSK expr cont stack =
-{- eta -}
+{- apply eta -}
 evalSK expr cont =
   case expr of
     Lit int ->
       -- cont (evalS (Lit int) stack)
       {- apply `evalS` -}
       -- cont (push int stack)
-      {- eta -}
+      {- apply eta -}
       cont . push int
     Bin op e1 e2 ->
       -- cont (evalS (Bin op e1 e2) stack)
@@ -35,7 +35,7 @@ evalSK expr cont =
       -- evalSK e2 (\s2 -> cont (evalOpS op s2)) (( evalS e1 stack ))
       {- unapply specification of `evalSK` -}
       -- evalSK e1 (\s1 -> evalSK e2 (\s2 -> cont (evalOpS op s2)) s1) stack
-      {- eta -}
+      {- apply eta -}
       evalSK e1 (evalSK e2 (cont . evalOpS op))
 
 

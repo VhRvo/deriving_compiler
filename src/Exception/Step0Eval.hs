@@ -109,10 +109,23 @@ evalK expr cont =
       -- (cont . maybe (eval e2) Just) (eval e1)
       {- unapply specification -}
       -- evalK e1 (cont . maybe (eval e2) Just)
+
+      -- path 1
+      -- evalK e1 (cont . maybe (eval e2) Just)
       {- unapply `composition` -}
       -- (\result -> evalK e1 (cont . maybe result Just)) (eval e2)
       {- unapply specification -}
-      evalK e2 (\result -> evalK e1 (cont . maybe result Just))
+      -- evalK e2 (\result -> evalK e1 (cont . maybe result Just))
+
+      -- path 2
+      -- evalK e1 (cont . maybe (eval e2) Just)
+      {- unapply eta -}
+      -- evalK e1 (\r1 -> cont (maybe (eval e2) Just r1))
+      {- extract continuation -}
+      -- evalK e1 (\r1 -> (\r2 -> cont (maybe r2 Just r1)) (eval e2))
+      {- apply specification -}
+      evalK e1 (\r1 -> evalK e2 (\r2 -> cont (maybe r2 Just r1)))
+
 
 eval2K :: Exp -> Value -> (Value -> Value) -> Value
 {-
