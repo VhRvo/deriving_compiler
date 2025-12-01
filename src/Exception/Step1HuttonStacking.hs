@@ -57,7 +57,7 @@ evalS expr stack =
             Nothing ->
               -- fail stack
               {- constructing `fail` -}
-              fail (Exception : Value v1 : stack)
+              fail (Value v1 : stack)
             Just v2 ->
               -- Value (evalOp op v1 v2) : stack
               {- constructing `evalOpS` -}
@@ -68,7 +68,7 @@ evalS expr stack =
       undefined
 
 fail :: Stack -> Stack
-fail (Exception : Value v1 : stack) =
+fail (Value v1 : stack) =
   fail stack
 
 evalOpS :: Op -> Stack -> Stack

@@ -76,6 +76,7 @@ library
       Exception.Step1HuttonStacking
       Exception.Step2Cps
       Exception.Hutton
+      Exception.MSEval
 
     -- Modules included in this library but not exported.
     -- other-modules:
