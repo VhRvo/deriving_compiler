@@ -77,6 +77,12 @@ library
       Exception.Step2Cps
       Exception.Hutton
       Exception.MSEval
+      Exception.MSEvalHutton
+      Exception.MEvalSEither
+      Exception.EitherEvalS
+      Exception.EitherEvalSK
+      Exception.EitherFailEvalS
+      Exception.EitherFailSuccessEvalS
 
     -- Modules included in this library but not exported.
     -- other-modules:

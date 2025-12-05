@@ -92,4 +92,18 @@ eval expr =
       {- apply `exec` -}
       {- apply `exec` -}
 
+{-
+exec (comp' expr code) = eval' expr (exec code) stack
+-}
+{-
+eval' expr (exec code) stack = exec (comp' expr code)
+-}
+eval' :: Exp -> (Stack -> Stack) -> Stack -> Stack
+eval' expr cont stack =
+  case expr of
+    Val n ->
+      cont (Value n : stack)
+    Add e1 e2 ->
+      undefined
+
 
