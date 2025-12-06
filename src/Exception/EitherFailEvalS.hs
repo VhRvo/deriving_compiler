@@ -193,8 +193,6 @@ evalS expr stack =
       handleHandler $
         evalS exception (Handler handler : stack)
 
-
-
       {- -}
       -- fmap ignoreHandler $
       --   (`errBind` failException) $
@@ -238,6 +236,12 @@ fail :: [Element] -> [Element]
 fail (Value _ : stack) = fail stack
 fail (Handler handler : stack) = Handler handler : stack
 
+handleHandler :: Either [Element] [Element] -> Either [Element] [Element]
+handleHandler (Left (Handler handler : stack)) =
+  evalS handler stack
+handleHandler (Right (Value value : Handler handler : stack)) =
+  Right (Value value : stack)
+
 {- garbage functions
 failException :: [Element] -> Either [Element] [Element]
 failException (Handler handler : stack') = evalS handler stack'
@@ -250,15 +254,10 @@ errBind (Left err) f = f err
 errBind (Right value) _ = Right value
 -}
 
-handleHandler :: Either [Element] [Element] -> Either [Element] [Element]
-handleHandler (Left (Handler handler : stack)) =
-  evalS handler stack
-handleHandler (Right (Value value : Handler handler : stack)) =
-  Right (Value value : stack)
 
-
-evalSK :: Exp -> ([Element] -> [Element]) -> ([Element] -> [Element]) -> [Element] -> [Element]
 {-
+evalSK :: Exp -> ([Element] -> [Element]) -> ([Element] -> [Element]) -> [Element] -> [Element]
+{- prehaps wrong/very partial specification, doesn't use the inner structure of `evalS` which is defined in terms of `eval`
 evalSK expr contErr contOk stack =
   case evalS expr stack of
     Left errStack ->
@@ -389,8 +388,8 @@ evalSK expr contErr contOk stack =
         (Handler handler : stack)
 
 -- handleHandlerK :: ([Element] -> [Element]) -> ([Element] -> [Element]) -> [Element] -> [Element]
--- handleHandlerK contErr contOk (Value value : Handler handler : stack) =
---   contOk (Value value : stack)
+-- -- handleHandlerK contErr contOk (Value value : Handler handler : stack) =
+-- --   contOk (Value value : stack)
 -- handleHandlerK contErr contOk (Handler handler : stack) =
 --   evalSK handler contErr contOk stack
 
@@ -460,3 +459,137 @@ ignoreHandlerK contOk (Value value : Handler _ : stack) =
     {- -}
     {- -}
     {- -}
+-}
+
+evalSK :: Exp -> ([Element] -> [Element]) -> ([Element] -> [Element]) -> [Element] -> [Element]
+{- prehaps wrong/very partial specification, doesn't use the inner structure of `evalS` which is defined in terms of `eval`
+evalSK expr contErr contOk stack =
+  case evalS expr stack of
+    Left failedStack ->
+      contErr failedStack
+    Right successStack ->
+      contOk successStack
+-}
+{-
+evalSK expr contErr contOk stack =
+  case eval expr of
+    Nothing ->
+      contErr (fail stack)
+    Just v ->
+      contOk (Value v : stack)
+-}
+{-
+evalSK expr contErr contOk stack =
+  maybe (contErr (fail stack)) (contOk . (: stack) . Value) (eval expr)
+-}
+evalSK expr contErr contOk stack =
+  case expr of
+    Lit int ->
+      -- evalSK (Lit int) contErr contOk stack
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) (eval (Lit int))
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) (Just int)
+      contOk (Value int : stack)
+    Bin op e1 e2 ->
+      -- evalSK (Bin op e1 e2) contErr contOk stack
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) (eval (Bin op e1 e2))
+      {- -}
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) $ do
+      --   v1 <- eval e1
+      --   v2 <- eval e2
+      --   pure (evalOp op v1 v2)
+      {- -}
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) $
+      --   case eval e1 of
+      --     Nothing ->
+      --       Nothing
+      --     Just v1 ->
+      --       case eval e2 of
+      --         Nothing ->
+      --           Nothing
+      --         Just v2 ->
+      --           Just (evalOp op v1 v2)
+      {- -}
+      -- case eval e1 of
+      --   Nothing ->
+      --     -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) Nothing
+      --     contErr (fail stack)
+      --   Just v1 ->
+      --     -- case eval e2 of
+      --     --   Nothing ->
+      --     --     -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) Nothing
+      --     --     -- contErr (fail stack)
+      --     --     {- definition of `fail` -}
+      --     --     contErr (fail (Value v1 : stack))
+      --     --   Just v2 ->
+      --     --     -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) $ Just (evalOp op v1 v2)
+      --     --     -- contOk (Value (evalOp op v1 v2) : stack)
+      --     --     -- contOk (evalOpS op (Value v2 : Value v1 : stack))
+      --     --     contOk . evalOpS op . (: (Value v1 : stack)) . Value $ v2
+      --     {- -}
+      --     -- maybe (contErr (fail (Value v1 : stack))) (contOk . evalOpS op . (: (Value v1 : stack)) . Value) (eval e2)
+      --     {- -}
+      --     -- maybe (contErr (fail (Value v1 : stack))) (contOk . evalOpS op . (: (Value v1 : stack)) . Value) (eval e2)
+      --     {- -}
+      --     evalSK e2 contErr (contOk . evalOpS op) (Value v1 : stack)
+      {- -}
+      -- maybe (contErr (fail stack)) (evalSK e2 contErr (contOk . evalOpS op) . (: stack) . Value) (eval e1)
+      {- -}
+      evalSK e1 contErr (evalSK e2 contErr (contOk . evalOpS op)) stack
+    Throw ->
+      -- evalSK Throw contErr contOk stack
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) (eval Throw)
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) Nothing
+      contErr (fail stack)
+    Catch exception handler ->
+      -- evalSK (Catch exception handler) contErr contOk stack
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) (eval (Catch exception handler))
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) (eval exception <|> eval handler)
+      {- -}
+      -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) $
+      --   case eval exception of
+      --     Nothing ->
+      --       eval handler
+      --     Just value ->
+      --       Just value
+      {- -}
+      -- case eval exception of
+      --   Nothing ->
+      --     -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) $ eval handler
+      --     -- evalSK handler contErr contOk stack
+      --     -- handleHanlderK contErr contOk (Handler handler : stack)
+      --     handleHanlderK contErr contOk (fail (Handler handler : stack))
+      --   Just value ->
+      --     -- maybe (contErr (fail stack)) (contOk . (: stack) . Value) $ Just value
+      --     -- contOk (Value value : stack)
+      --     contOk . ignoreHandlerK $ (Value value : Handler handler : stack)
+      {- -}
+      -- maybe
+      --   (handleHanlderK contErr contOk (fail (Handler handler : stack)))
+      --   (contOk . ignoreHandlerK . (: (Handler handler : stack)) . Value)
+      --   (eval exception)
+      {- -}
+      evalSK exception (handleHanlderK contErr contOk) (contOk . ignoreHandlerK) (Handler handler : stack)
+
+handleHanlderK :: ([Element] -> [Element]) -> ([Element] -> [Element]) -> [Element] -> [Element]
+handleHanlderK contErr contOk (Handler handler : stack) =
+  evalSK handler contErr contOk stack
+
+ignoreHandlerK :: [Element] -> [Element]
+ignoreHandlerK (Value value : Handler handler : stack) =
+  Value value : stack
+
+{-
+eval :: Exp -> Maybe Int
+eval expr =
+  case expr of
+    Lit int ->
+      pure int
+    Bin op e1 e2 -> do
+      v1 <- eval e1
+      v2 <- eval e2
+      pure (evalOp op v1 v2)
+    Throw ->
+      Nothing
+    Catch exception handler ->
+      eval exception <|> eval handler
+-}
