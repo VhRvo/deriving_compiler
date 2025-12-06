@@ -39,10 +39,10 @@ evalS :: Exp -> [Element] -> Either [Element] [Element]
 {-
 evalS expr stack =
   case eval expr of
-    Just v ->
-      Right (v : stack)
     Nothing ->
       Left (fail stack)
+    Just v ->
+      Right (v : stack)
 -}
 {-
 evalS expr stack =
