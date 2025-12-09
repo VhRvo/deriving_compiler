@@ -233,8 +233,8 @@ evalS expr stack =
       -- evalS exception stack `errBind` evalS handler
 
 fail :: [Element] -> [Element]
-fail [] = []
-fail (Value _ : stack) = fail stack
+fail []                        = []
+fail (Value _ : stack)         = fail stack
 fail (Handler handler : stack) = Handler handler : stack
 
 handleHandler :: Either [Element] [Element] -> Either [Element] [Element]
