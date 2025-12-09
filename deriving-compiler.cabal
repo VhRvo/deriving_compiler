@@ -82,6 +82,9 @@ library
       Exception.EitherEvalS
       Exception.EitherEvalSK
       Exception.EitherFailEvalS
+      Exception.EitherFailEvalKOnlyOk
+      Exception.EitherFailEvalDOnlyOk
+      Exception.EitherFailEvalD
       Exception.EitherFailSuccessEvalS
 
     -- Modules included in this library but not exported.
@@ -94,7 +97,7 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.19.2.0
+    build-depends:    base
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -117,7 +120,7 @@ executable deriving-compiler
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.19.2.0,
+        base,
         deriving-compiler
 
     -- Directories containing source files.
@@ -150,5 +153,5 @@ test-suite deriving-compiler-test
 
     -- Test dependencies.
     build-depends:
-        base ^>=4.19.2.0,
+        base,
         deriving-compiler

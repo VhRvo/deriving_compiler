@@ -233,6 +233,7 @@ evalS expr stack =
       -- evalS exception stack `errBind` evalS handler
 
 fail :: [Element] -> [Element]
+fail [] = []
 fail (Value _ : stack) = fail stack
 fail (Handler handler : stack) = Handler handler : stack
 
@@ -577,19 +578,3 @@ handleHanlderK contErr contOk (Handler handler : stack) =
 ignoreHandlerK :: [Element] -> [Element]
 ignoreHandlerK (Value value : Handler handler : stack) =
   Value value : stack
-
-{-
-eval :: Exp -> Maybe Int
-eval expr =
-  case expr of
-    Lit int ->
-      pure int
-    Bin op e1 e2 -> do
-      v1 <- eval e1
-      v2 <- eval e2
-      pure (evalOp op v1 v2)
-    Throw ->
-      Nothing
-    Catch exception handler ->
-      eval exception <|> eval handler
--}
